@@ -16,7 +16,7 @@ limitations under the License.
 
 // TODO
 // Move this file to pkg/k8sresource/v1alpha1
-package v1alpha1
+package k8s
 
 // verify if resource struct is an implementation of ResourceGetter
 var _ ResourceGetter = &ResourceStruct{}

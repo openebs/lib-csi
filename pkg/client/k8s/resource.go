@@ -17,7 +17,7 @@ limitations under the License.
 // TODO
 // Move this file to pkg/k8sresource/v1alpha1
 
-package v1alpha1
+package k8s
 
 import (
 	"fmt"

@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package k8s
 
 import (
-	"github.com/openebs/lib-csi/pkg/common/env"
 	"os"
 	"testing"
+
+	"github.com/openebs/lib-csi/pkg/common/env"
 )
 
 // test if configFromENV implements ConfigGetter interface
