@@ -44,7 +44,7 @@ func getNodeList(topo *csi.TopologyRequirement) ([]string, error) {
 					break
 				}
 			}
-			if nodeFiltered == false {
+			if !nodeFiltered {
 				nodelist = append(nodelist, node.Name)
 				break
 			}
