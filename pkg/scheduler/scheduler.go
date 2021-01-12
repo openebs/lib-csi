@@ -17,13 +17,19 @@ limitations under the License.
 package scheduler
 
 import (
-	"math"
+	"sort"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	k8sapi "github.com/openebs/lib-csi/pkg/client/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
 )
+
+// key value struct for creating the filtered list
+type kv struct {
+	Key   string
+	Value int64
+}
 
 // getNodeList gets the nodelist which satisfies the topology info
 func getNodeList(topo *csi.TopologyRequirement) ([]string, error) {
@@ -56,43 +62,57 @@ func getNodeList(topo *csi.TopologyRequirement) ([]string, error) {
 
 // runScheduler goes through the node mapping
 // in the topology and picks the node which is less weighted
-func runScheduler(nodelist []string, nmap map[string]int64) string {
-	var selected string
+func runScheduler(nodelist []string, nmap map[string]int64) []string {
+	var preferred []string
+	var fmap []kv
 
-	var weight int64 = math.MaxInt64
-
-	// schedule it on the node which has less weight
+	// go though the filtered node and prepare the preferred list
 	for _, node := range nodelist {
-		if nmap[node] < weight {
-			selected = node
-			weight = nmap[node]
+		if val, ok := nmap[node]; ok {
+			// create the filtered node map
+			fmap = append(fmap, kv{node, val})
+		} else {
+			// put the non occupied nodes in beginning of the list
+			preferred = append(preferred, node)
 		}
 	}
-	return selected
+
+	// sort the filtered node map
+	sort.Slice(fmap, func(i, j int) bool {
+		return fmap[i].Value < fmap[j].Value
+	})
+
+	// put the occupied nodes in the sorted order at the end
+	for _, kv := range fmap {
+		preferred = append(preferred, kv.Key)
+	}
+
+	return preferred
 }
 
 // Scheduler schedules the PV as per topology constraints for
 // the given node weight.
-func Scheduler(req *csi.CreateVolumeRequest, nmap map[string]int64) string {
+func Scheduler(req *csi.CreateVolumeRequest, nmap map[string]int64) []string {
+	var nodelist []string
 	topo := req.AccessibilityRequirements
 	if topo == nil ||
 		len(topo.Preferred) == 0 {
 		klog.Errorf("scheduler: topology information not provided")
-		return ""
+		return nodelist
 	}
 
 	nodelist, err := getNodeList(topo)
 	if err != nil {
 		klog.Errorf("scheduler: can not get the nodelist err : %v", err.Error())
-		return ""
+		return nodelist
 	} else if len(nodelist) == 0 {
 		klog.Errorf("scheduler: nodelist is empty")
-		return ""
+		return nodelist
 	}
 
 	// if there is a single node, schedule it on that
 	if len(nodelist) == 1 {
-		return nodelist[0]
+		return nodelist
 	}
 
 	return runScheduler(nodelist, nmap)
