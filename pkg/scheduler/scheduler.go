@@ -32,7 +32,7 @@ type kv struct {
 }
 
 // getNodeList gets the nodelist which satisfies the topology info
-func getNodeList(topo *csi.TopologyRequirement) ([]string, error) {
+func getNodeList(topo []*csi.Topology) ([]string, error) {
 
 	var nodelist []string
 
@@ -42,7 +42,7 @@ func getNodeList(topo *csi.TopologyRequirement) ([]string, error) {
 	}
 
 	for _, node := range list.Items {
-		for _, prf := range topo.Preferred {
+		for _, prf := range topo {
 			nodeFiltered := false
 			for key, value := range prf.Segments {
 				if node.Labels[key] != value {
@@ -94,9 +94,20 @@ func runScheduler(nodelist []string, nmap map[string]int64) []string {
 // the given node weight.
 func Scheduler(req *csi.CreateVolumeRequest, nmap map[string]int64) []string {
 	var nodelist []string
-	topo := req.AccessibilityRequirements
-	if topo == nil ||
-		len(topo.Preferred) == 0 {
+	areq := req.AccessibilityRequirements
+
+	if areq == nil {
+		klog.Errorf("scheduler: Accessibility Requirements not provided")
+		return nodelist
+	}
+
+	topo := areq.Preferred
+	if len(topo) == 0  {
+		// if preferred list is empty, use the requisite
+		topo = areq.Requisite
+	}
+
+	if len(topo) == 0  {
 		klog.Errorf("scheduler: topology information not provided")
 		return nodelist
 	}
