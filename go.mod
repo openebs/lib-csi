@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/container-storage-interface/spec v1.1.0
 	github.com/gogo/protobuf v1.3.0 // indirect
+	github.com/google/uuid v1.0.0
 	github.com/googleapis/gnostic v0.3.1 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/json-iterator/go v1.1.8 // indirect
