@@ -31,6 +31,9 @@ func SetIOLimits(request *Request) error {
 }
 
 func validate(request *Request) (*ValidRequest, error) {
+	if !helpers.IsValidUUID(request.PodUid) {
+		return nil, errors.New("Expected PodUid in UUID format, Got " + request.PodUid)
+	}
 	podCGPath, err := getPodCGroupPath(request.PodUid, request.ContainerRuntime)
 	if err != nil {
 		return nil, err
