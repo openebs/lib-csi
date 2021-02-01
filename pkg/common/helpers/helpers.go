@@ -58,7 +58,7 @@ func exists(path string) (os.FileInfo, bool) {
 // FileExists checks if a file exists and is not a directory
 func FileExists(filepath string) bool {
 	info, present := exists(filepath)
-	return present && !info.IsDir()
+	return present && info.Mode().IsRegular()
 }
 
 // DirExists checks if a directory exists
