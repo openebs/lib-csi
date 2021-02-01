@@ -60,8 +60,8 @@ func getNodeList(topo []*csi.Topology) ([]string, error) {
 	return nodelist, nil
 }
 
-// runScheduler goes through the node mapping
-// in the topology and picks the node which is less weighted
+// runScheduler goes through the node mapping in the topology
+// and creates the list of preferred nodes as per their weight
 func runScheduler(nodelist []string, nmap map[string]int64) []string {
 	var preferred []string
 	var fmap []kv
