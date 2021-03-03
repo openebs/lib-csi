@@ -65,7 +65,7 @@ func validate(request *Request) (*ValidRequest, error) {
 	return &ValidRequest{
 		FilePath:     ioMaxFile,
 		DeviceNumber: deviceNumber,
-		IOMax:      request.IOLimit,
+		IOMax:        request.IOLimit,
 	}, nil
 }
 
@@ -114,8 +114,8 @@ func getDeviceNumber(deviceName string) (*DeviceNumber, error) {
 		return nil, err
 	}
 	return &DeviceNumber{
-		Major: uint64(stat.Rdev/256),
-		Minor: uint64(stat.Rdev%256),
+		Major: uint64(stat.Rdev / 256),
+		Minor: uint64(stat.Rdev % 256),
 	}, nil
 }
 
