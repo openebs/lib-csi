@@ -97,7 +97,11 @@ func getContainerdPodCGSuffix(podUid string) string {
 func getContainerdCGPath(podUid string) (string, error) {
 	kubepodsCGPath := baseCgroupPath + "/kubepods.slice"
 	podSuffix := getContainerdPodCGSuffix(podUid)
-	podCGPath := kubepodsCGPath + "/kubepods-besteffort.slice/kubepods-besteffort-" + podSuffix + ".slice"
+	podCGPath := kubepodsCGPath + "/kubepods-" + podSuffix + ".slice"
+	if helpers.DirExists(podCGPath) {
+		return podCGPath, nil
+	}
+	podCGPath = kubepodsCGPath + "/kubepods-besteffort.slice/kubepods-besteffort-" + podSuffix + ".slice"
 	if helpers.DirExists(podCGPath) {
 		return podCGPath, nil
 	}
