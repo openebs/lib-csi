@@ -39,7 +39,7 @@ func xfsTempMount(device string) error {
 
 	// create a temporary directory to mount the xfs file system
 	tmpdir := "/tmp/" + volname
-	err = os.Mkdir(tmpdir, 0755)
+	err = os.Mkdir(tmpdir, 0750)
 	if os.IsNotExist(err) {
 		klog.Errorf("xfs: failed to create tmpdir %s error: %s", tmpdir, err.Error())
 		return err
