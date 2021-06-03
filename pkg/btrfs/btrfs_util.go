@@ -19,7 +19,13 @@ package btrfs
 import (
 	"os/exec"
 
+	"github.com/openebs/lib-csi/pkg/common/errors"
 	"k8s.io/klog"
+)
+
+const (
+	// BTRFS is a command line utility of btrfs filesystem
+	BTRFS = "btrfs"
 )
 
 /*
@@ -39,5 +45,24 @@ func GenerateUUID(device string) error {
 		return err
 	}
 	klog.Infof("btrfs: generated UUID for the device %s \n %v", device, string(out))
+	return nil
+}
+
+// ResizeBTRFS will expand btrfs filesystem at given mount point
+func ResizeBTRFS(mountPoint string) error {
+	args := []string{"filesystem", "resize", "max", mountPoint}
+	cmd := exec.Command(BTRFS, args...)
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		klog.Errorf(
+			"btrfs utility could not expand btrfs filesystem "+
+				"on mount point: %s cmd: %v error: %s",
+			mountPoint,
+			args,
+			string(out),
+		)
+		return errors.Wrap(err, string(out))
+	}
 	return nil
 }
