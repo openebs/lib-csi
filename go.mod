@@ -7,10 +7,12 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/pkg/errors v0.9.1
+	google.golang.org/grpc v1.27.1
 	k8s.io/api v0.20.2
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.20.2
 	k8s.io/klog v1.0.0
+	k8s.io/klog/v2 v2.4.0
 	k8s.io/utils v0.0.0-20201110183641-67b214c5f920
 )
 
