@@ -34,7 +34,7 @@ type NodeLister interface {
 	List(options metav1.ListOptions) (*corev1.NodeList, error)
 }
 
-//NodeStruct returns a struct used to instantiate a kubernetes Node
+// NodeStruct returns a struct used to instantiate a kubernetes Node
 type NodeStruct struct{}
 
 // Node returnd a pointer to the node struct

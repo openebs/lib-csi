@@ -17,14 +17,14 @@ limitations under the License.
 package xfs
 
 import (
-	"github.com/openebs/lib-csi/pkg/mount"
 	"os"
 	"os/exec"
 	"path/filepath"
-
 	"strings"
 
-	"k8s.io/klog"
+	"github.com/openebs/lib-csi/pkg/mount"
+
+	"k8s.io/klog/v2"
 )
 
 func xfsTempMount(device string) error {

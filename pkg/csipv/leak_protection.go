@@ -90,17 +90,22 @@ func NewLeakProtectionController(
 		pvcLister:       pvcInformer.Lister(),
 		pvcListerSynced: pvcInformer.Informer().HasSynced,
 
-		queue: workqueue.NewNamedRateLimitingQueue(
-			workqueue.DefaultControllerRateLimiter(), "leak-protection"),
+		queue: workqueue.NewRateLimitingQueueWithConfig(
+			workqueue.DefaultControllerRateLimiter(), workqueue.RateLimitingQueueConfig{
+				Name: "leak-protection",
+			}),
 		claimsInProgress: newSyncSet(),
 	}
 
-	pvcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, err := pvcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: c.onAddUpdate,
 		UpdateFunc: func(old, new interface{}) {
 			c.onAddUpdate(new)
 		},
 	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to add ResourceEventHandler to the shared informer: %v", err.Error())
+	}
 
 	return c, nil
 }
@@ -285,14 +290,15 @@ func (c *LeakProtectionController) removeFinalizer(pvc *corev1.PersistentVolumeC
 // Returned finishCreateVolume function must be called (preferably under defer)
 // after attempting to provision volume.
 // e.g
-// {
-//		finishCreateVolume, err := c.BeginCreateVolume("volumeId", "namespace", "name")
-//		if err != nil {
-//			return nil, status.Errorf(codes.FailedPrecondition, err.Error())
-//		}
-//		defer finishCreateVolume()
-//		..... start provisioning volume here .....
-// }
+//
+//	{
+//			finishCreateVolume, err := c.BeginCreateVolume("volumeId", "namespace", "name")
+//			if err != nil {
+//				return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+//			}
+//			defer finishCreateVolume()
+//			..... start provisioning volume here .....
+//	}
 func (c *LeakProtectionController) BeginCreateVolume(volumeName,
 	pvcNamespace, pvcName string) (func(), error) {
 	pvc, err := c.client.CoreV1().PersistentVolumeClaims(pvcNamespace).

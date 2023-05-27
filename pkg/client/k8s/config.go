@@ -67,7 +67,8 @@ func (c *configFromREST) Get() (*rest.Config, error) {
 // ConfigGetters holds a list of ConfigGetter instances
 //
 // NOTE:
-//  This is an implementation of ConfigGetter
+//
+//	This is an implementation of ConfigGetter
 type ConfigGetters []ConfigGetter
 
 // Name returns the name of this config getter instance

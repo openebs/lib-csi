@@ -20,9 +20,10 @@ import (
 	"sort"
 
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	k8sapi "github.com/openebs/lib-csi/pkg/client/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
+
+	k8sapi "github.com/openebs/lib-csi/pkg/client/k8s"
 )
 
 // key value struct for creating the filtered list

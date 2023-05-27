@@ -26,7 +26,7 @@ type DynamicProvider interface {
 	Provide() (k8sdynamic.Interface, error)
 }
 
-//DynamicStruct is used to initialise a kuberenets dynamic interface
+// DynamicStruct is used to initialise a kuberenets dynamic interface
 type DynamicStruct struct{}
 
 // Dynamic returns a new instance of dynamic
