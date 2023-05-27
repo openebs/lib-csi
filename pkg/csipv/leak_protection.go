@@ -285,14 +285,15 @@ func (c *LeakProtectionController) removeFinalizer(pvc *corev1.PersistentVolumeC
 // Returned finishCreateVolume function must be called (preferably under defer)
 // after attempting to provision volume.
 // e.g
-// {
-//		finishCreateVolume, err := c.BeginCreateVolume("volumeId", "namespace", "name")
-//		if err != nil {
-//			return nil, status.Errorf(codes.FailedPrecondition, err.Error())
-//		}
-//		defer finishCreateVolume()
-//		..... start provisioning volume here .....
-// }
+//
+//	{
+//			finishCreateVolume, err := c.BeginCreateVolume("volumeId", "namespace", "name")
+//			if err != nil {
+//				return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+//			}
+//			defer finishCreateVolume()
+//			..... start provisioning volume here .....
+//	}
 func (c *LeakProtectionController) BeginCreateVolume(volumeName,
 	pvcNamespace, pvcName string) (func(), error) {
 	pvc, err := c.client.CoreV1().PersistentVolumeClaims(pvcNamespace).

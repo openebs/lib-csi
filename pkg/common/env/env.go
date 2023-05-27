@@ -42,7 +42,8 @@ type EnvironmentLookup func(envKey string) (value string, present bool)
 // Set sets the provided environment variable
 //
 // NOTE:
-//  This is an implementation of EnvironmentSetter
+//
+//	This is an implementation of EnvironmentSetter
 func Set(envKey string, value string) (err error) {
 	return os.Setenv(string(envKey), value)
 }
@@ -50,7 +51,8 @@ func Set(envKey string, value string) (err error) {
 // Get fetches value from the provided environment variable
 //
 // NOTE:
-//  This is an implementation of EnvironmentGetter
+//
+//	This is an implementation of EnvironmentGetter
 func Get(envKey string) (value string) {
 	return getEnv(string(envKey))
 }
@@ -71,7 +73,8 @@ func GetOrDefault(e string, defaultValue string) (value string) {
 // Lookup looks up an environment variable
 //
 // NOTE:
-//  This is an implementation of EnvironmentLookup
+//
+//	This is an implementation of EnvironmentLookup
 func Lookup(envKey string) (value string, present bool) {
 	return lookupEnv(string(envKey))
 }

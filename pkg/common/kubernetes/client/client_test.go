@@ -65,11 +65,11 @@ func fakeGetKubeMasterIPNil(e string) string {
 	return ""
 }
 
-func fakeGetDynamicClientSetOk(c *rest.Config) (dynamic.Interface, error) {
+func fakeGetDynamicClientSetOk(c *rest.Config) (*dynamic.DynamicClient, error) {
 	return dynamic.NewForConfig(c)
 }
 
-func fakeGetDynamicClientSetErr(c *rest.Config) (dynamic.Interface, error) {
+func fakeGetDynamicClientSetErr(c *rest.Config) (*dynamic.DynamicClient, error) {
 	return nil, errors.New("fake error")
 }
 
