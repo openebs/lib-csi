@@ -17,12 +17,13 @@ limitations under the License.
 package iolimit
 
 import (
-	"github.com/openebs/lib-csi/pkg/common/errors"
-	"github.com/openebs/lib-csi/pkg/common/helpers"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/openebs/lib-csi/pkg/common/errors"
+	"github.com/openebs/lib-csi/pkg/common/helpers"
 )
 
 const (
@@ -142,6 +143,6 @@ func getIOLimitsStr(deviceNumber *DeviceNumber, ioMax *IOMax) string {
 
 func setIOLimits(request *ValidRequest) error {
 	line := getIOLimitsStr(request.DeviceNumber, request.IOMax)
-	err := ioutil.WriteFile(request.FilePath, []byte(line), 0600)
+	err := os.WriteFile(request.FilePath, []byte(line), 0600)
 	return err
 }

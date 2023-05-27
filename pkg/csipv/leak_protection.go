@@ -90,17 +90,22 @@ func NewLeakProtectionController(
 		pvcLister:       pvcInformer.Lister(),
 		pvcListerSynced: pvcInformer.Informer().HasSynced,
 
-		queue: workqueue.NewNamedRateLimitingQueue(
-			workqueue.DefaultControllerRateLimiter(), "leak-protection"),
+		queue: workqueue.NewRateLimitingQueueWithConfig(
+			workqueue.DefaultControllerRateLimiter(), workqueue.RateLimitingQueueConfig{
+				Name: "leak-protection",
+			}),
 		claimsInProgress: newSyncSet(),
 	}
 
-	pvcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, err := pvcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: c.onAddUpdate,
 		UpdateFunc: func(old, new interface{}) {
 			c.onAddUpdate(new)
 		},
 	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to add ResourceEventHandler to the shared informer: %v", err.Error())
+	}
 
 	return c, nil
 }
