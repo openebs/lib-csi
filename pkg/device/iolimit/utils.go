@@ -96,19 +96,26 @@ func getContainerdPodCGSuffix(podUid string) string {
 }
 
 func getContainerdCGPath(podUid string) (string, error) {
-	kubepodsCGPath := baseCgroupPath + "/kubepods.slice"
+	// --cgroup-driver=systemd
+	// see reference https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
+	systemdCGPath := baseCgroupPath + "/kubepods.slice"
 	podSuffix := getContainerdPodCGSuffix(podUid)
-	podCGPath := kubepodsCGPath + "/kubepods-" + podSuffix + ".slice"
-	if helpers.DirExists(podCGPath) {
-		return podCGPath, nil
+	systemdQosClassPrefixesPath := []string{"/kubepods-", "/kubepods-besteffort.slice/kubepods-besteffort-", "/kubepods-burstable.slice/kubepods-burstable-"}
+	for _, qosClassPrefix := range systemdQosClassPrefixesPath {
+		podCGPath := systemdCGPath + qosClassPrefix + podSuffix + ".slice"
+		if helpers.DirExists(podCGPath) {
+			return podCGPath, nil
+		}
 	}
-	podCGPath = kubepodsCGPath + "/kubepods-besteffort.slice/kubepods-besteffort-" + podSuffix + ".slice"
-	if helpers.DirExists(podCGPath) {
-		return podCGPath, nil
-	}
-	podCGPath = kubepodsCGPath + "/kubepods-burstable.slice/kubepods-burstable-" + podSuffix + ".slice"
-	if helpers.DirExists(podCGPath) {
-		return podCGPath, nil
+
+	// --cgroup-driver=cgroupfs
+	cgroupFsCGPath := baseCgroupPath + "/kubepods"
+	cgroupFsCQosPrefixes := []string{"/pod", "/besteffort/pod", "/burstable/pod"}
+	for _, qosClassPrefix := range cgroupFsCQosPrefixes {
+		podCGPath := cgroupFsCGPath + qosClassPrefix + podUid
+		if helpers.DirExists(podCGPath) {
+			return podCGPath, nil
+		}
 	}
 	return "", errors.New("CGroup Path not found for pod with Uid: " + podUid)
 }
