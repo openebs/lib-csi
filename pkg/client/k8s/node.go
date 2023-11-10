@@ -101,3 +101,21 @@ func GetOSAndKernelVersion() (string, error) {
 	nodedetails := firstNode.Items[0].Status.NodeInfo
 	return nodedetails.OSImage + ", " + nodedetails.KernelVersion, nil
 }
+
+// GetNodeInfo gathers details from the first Kubernetes Node and returns -- OS, Kernel version and Arch.
+func GetNodeInfo() (nodeOs, nodeKernelVersion, nodeArch string, err error) {
+	nodes := Node()
+	firstNode, err := nodes.List(metav1.ListOptions{Limit: 1})
+	if err != nil {
+		return "unknown",
+			"unknown",
+			"unknown",
+			errors.Wrapf(err, "failed to get the os kernel/arch")
+	}
+
+	nodeOs = firstNode.Items[0].Status.NodeInfo.OSImage
+	nodeKernelVersion = firstNode.Items[0].Status.NodeInfo.KernelVersion
+	nodeArch = firstNode.Items[0].Status.NodeInfo.Architecture
+
+	return
+}
