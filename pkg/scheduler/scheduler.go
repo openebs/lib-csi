@@ -32,7 +32,7 @@ type kv struct {
 	Value int64
 }
 
-// getNodeList gets the nodelist which satisfies the topology info
+// getNodeList gets the nodelist which satisfies the topology info, excludes cordoned nodes.
 func getNodeList(topo []*csi.Topology) ([]string, error) {
 
 	var nodelist []string
@@ -43,17 +43,19 @@ func getNodeList(topo []*csi.Topology) ([]string, error) {
 	}
 
 	for _, node := range list.Items {
-		for _, prf := range topo {
-			nodeFiltered := false
-			for key, value := range prf.Segments {
-				if node.Labels[key] != value {
-					nodeFiltered = true
+		if !node.Spec.Unschedulable {
+			for _, prf := range topo {
+				nodeFiltered := false
+				for key, value := range prf.Segments {
+					if node.Labels[key] != value {
+						nodeFiltered = true
+						break
+					}
+				}
+				if !nodeFiltered {
+					nodelist = append(nodelist, node.Name)
 					break
 				}
-			}
-			if !nodeFiltered {
-				nodelist = append(nodelist, node.Name)
-				break
 			}
 		}
 	}
