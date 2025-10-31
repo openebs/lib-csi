@@ -17,7 +17,7 @@ limitations under the License.
 package mount
 
 import (
-	"k8s.io/utils/mount"
+	"k8s.io/mount-utils"
 )
 
 // GetMounts gets mountpoints for the specified volume
