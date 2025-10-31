@@ -57,7 +57,7 @@ type LeakProtectionController struct {
 	pvcLister       corelisters.PersistentVolumeClaimLister
 	pvcListerSynced cache.InformerSynced
 
-	queue workqueue.RateLimitingInterface
+	queue workqueue.TypedRateLimitingInterface[string]
 
 	// track set of pending volumes creation (stores pvc namespaced name string).
 	// It is used in synchronizing BeginCreateVolume (invoked by csi.CreateVolume)
@@ -90,8 +90,8 @@ func NewLeakProtectionController(
 		pvcLister:       pvcInformer.Lister(),
 		pvcListerSynced: pvcInformer.Informer().HasSynced,
 
-		queue: workqueue.NewRateLimitingQueueWithConfig(
-			workqueue.DefaultControllerRateLimiter(), workqueue.RateLimitingQueueConfig{
+		queue: workqueue.NewTypedRateLimitingQueueWithConfig[string](
+			workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
 				Name: "leak-protection",
 			}),
 		claimsInProgress: newSyncSet(),
@@ -158,7 +158,7 @@ func (c *LeakProtectionController) processNextWorkItem() bool {
 	}
 	defer c.queue.Done(pvcKey)
 
-	pvcNamespace, pvcName, err := cache.SplitMetaNamespaceKey(pvcKey.(string))
+	pvcNamespace, pvcName, err := cache.SplitMetaNamespaceKey(pvcKey)
 	if err != nil {
 		utilruntime.HandleError(fmt.Errorf("error parsing pvc key %q: %v", pvcKey, err))
 		return true
@@ -240,8 +240,8 @@ func (c *LeakProtectionController) addFinalizer(pvc *corev1.PersistentVolumeClai
 	}
 
 	claimClone := pvc.DeepCopy()
-	claimClone.ObjectMeta.Annotations[c.GetAnnotationKey()] = volumeName
-	claimClone.ObjectMeta.Finalizers = append(claimClone.ObjectMeta.Finalizers, finalizer)
+	claimClone.Annotations[c.GetAnnotationKey()] = volumeName
+	claimClone.Finalizers = append(claimClone.Finalizers, finalizer)
 	_, err := c.client.CoreV1().PersistentVolumeClaims(claimClone.Namespace).Update(context.TODO(), claimClone, metav1.UpdateOptions{})
 	if err != nil {
 		klog.ErrorS(err, "failed to add finalizer to pvc", "pvc", klog.KObj(pvc))
@@ -257,9 +257,9 @@ func (c *LeakProtectionController) removeFinalizer(pvc *corev1.PersistentVolumeC
 	claimClone := pvc.DeepCopy()
 
 	// remove the annotation added previously.
-	delete(claimClone.ObjectMeta.Annotations, c.GetAnnotationKey())
+	delete(claimClone.Annotations, c.GetAnnotationKey())
 
-	currFinalizerList := claimClone.ObjectMeta.Finalizers
+	currFinalizerList := claimClone.Finalizers
 	newFinalizerList := make([]string, 0, len(currFinalizerList))
 	for _, v := range currFinalizerList {
 		if v == finalizer {
@@ -267,7 +267,7 @@ func (c *LeakProtectionController) removeFinalizer(pvc *corev1.PersistentVolumeC
 		}
 		newFinalizerList = append(newFinalizerList, v)
 	}
-	claimClone.ObjectMeta.Finalizers = newFinalizerList
+	claimClone.Finalizers = newFinalizerList
 
 	_, err := c.client.CoreV1().PersistentVolumeClaims(claimClone.Namespace).Update(context.TODO(), claimClone, metav1.UpdateOptions{})
 	if err != nil {
@@ -310,7 +310,7 @@ func (c *LeakProtectionController) BeginCreateVolume(volumeName,
 		// if pvc is already marked for deletion, return err.
 		err = fmt.Errorf("pvc already marked for deletion")
 		klog.ErrorS(err, "", "pvc", klog.KRef(pvcNamespace, pvcName))
-		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+		return nil, status.Errorf(codes.FailedPrecondition, "%s", err.Error())
 	}
 
 	key := c.claimsInProgressKey(pvc)
