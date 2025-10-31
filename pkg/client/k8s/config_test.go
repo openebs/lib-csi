@@ -48,10 +48,18 @@ func TestConfigFromENV(t *testing.T) {
 	// is a global setting, the tests should run serially
 	for name, mock := range tests {
 		masterip := os.Getenv(string(env.KubeMaster))
-		defer os.Setenv(string(env.KubeMaster), masterip)
+		defer func() {
+			if err := os.Setenv(string(env.KubeMaster), masterip); err != nil {
+				t.Errorf("failed to restore env variable %s: %v", env.KubeMaster, err)
+			}
+		}()
 
 		kubeconfig := os.Getenv(string(env.KubeConfig))
-		defer os.Setenv(string(env.KubeConfig), kubeconfig)
+		defer func() {
+			if err := os.Setenv(string(env.KubeConfig), kubeconfig); err != nil {
+				t.Errorf("failed to restore env variable %s: %v", env.KubeConfig, err)
+			}
+		}()
 
 		err := os.Setenv(string(env.KubeMaster), mock.masterip)
 		if err != nil {

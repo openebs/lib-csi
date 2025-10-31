@@ -57,19 +57,19 @@ func (e *err) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprint(s, message)
+			_, _ = fmt.Fprint(s, message)
 			for i, pc := range *e.stack {
 				if i > 0 {
 					return
 				}
 				f := errors.Frame(pc)
-				fmt.Fprintf(s, "\n%s%+v", e.prefix, f)
+				_, _ = fmt.Fprintf(s, "\n%s%+v", e.prefix, f)
 			}
 			return
 		}
 		fallthrough
 	case 's', 'q':
-		fmt.Fprint(s, message)
+		_, _ = fmt.Fprint(s, message)
 	}
 }
 
@@ -91,14 +91,14 @@ func (w *wrapper) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprintf(s, "%+v\n", w.error)
-			fmt.Fprint(s, w.prefix+w.msg)
+			_, _ = fmt.Fprintf(s, "%+v\n", w.error)
+			_, _ = fmt.Fprint(s, w.prefix+w.msg)
 			return
 		}
 		fallthrough
 	case 's', 'q':
-		fmt.Fprintf(s, "%s\n", w.error)
-		fmt.Fprint(s, w.prefix+w.msg)
+		_, _ = fmt.Fprintf(s, "%s\n", w.error)
+		_, _ = fmt.Fprint(s, w.prefix+w.msg)
 	}
 }
 
@@ -115,19 +115,19 @@ func (ws *withStack) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprint(s, message)
+			_, _ = fmt.Fprint(s, message)
 			for i, pc := range *ws.stack {
 				if i > 0 {
 					return
 				}
 				f := errors.Frame(pc)
-				fmt.Fprintf(s, "\n%s%+v", ws.prefix, f)
+				_, _ = fmt.Fprintf(s, "\n%s%+v", ws.prefix, f)
 			}
 			return
 		}
 		fallthrough
 	case 's', 'q':
-		fmt.Fprint(s, message)
+		_, _ = fmt.Fprint(s, message)
 	}
 }
 
@@ -157,7 +157,7 @@ func (el *ErrorList) Format(s fmt.State, verb rune) {
 	for _, err := range el.Errors {
 		message += "\n" + listErrorMessagePrefix + err.Error()
 	}
-	fmt.Fprint(s, message)
+	_, _ = fmt.Fprint(s, message)
 
 }
 
