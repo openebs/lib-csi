@@ -1,8 +1,6 @@
 module github.com/openebs/lib-csi
 
-go 1.24.0
-
-toolchain go1.24.7
+go 1.24.12
 
 require (
 	github.com/container-storage-interface/spec v1.11.0
